@@ -3,225 +3,120 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
-import { ArrowUp, ArrowDown, Briefcase, DollarSign, Calendar, Layers, TrendingUp, AlertTriangle, Eye, Clock } from 'lucide-react';
+import { ArrowUp, ArrowDown, Briefcase, DollarSign, Calendar, Layers, TrendingUp, AlertTriangle, Eye, Clock, RefreshCw, Globe, ExternalLink, Newspaper } from 'lucide-react';
 
 const IPOTrackerApp = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [filterSector, setFilterSector] = useState('All');
+  const [newsTab, setNewsTab] = useState('all');
   
-  // Sample data - in a real app, this would come from APIs
-  const upcomingIPOs = [
-    { 
-      id: 1, 
-      name: 'Hinge Health', 
-      sector: 'Health Tech',
-      targetValuation: 2.6,
-      filingDate: '2025-02-10',
-      expectedDebutDate: '2025-05-20',
-      roadshowStatus: 'In Progress',
-      fundingRaised: 600,
-      lastValuation: 1.8,
-      growth: 115,
-      risk: 'Medium',
-      stage: 'Roadshow',
-      revenueGrowth: [
-        { year: '2022', value: 80 },
-        { year: '2023', value: 120 },
-        { year: '2024', value: 210 },
-      ],
-      keyMetrics: {
-        cac: '$420',
-        ltv: '$2,100',
-        margins: '68%',
-        burnRate: '$2.8M/month',
-      },
-      news: [
-        { date: '2025-05-02', title: 'Launches IPO roadshow targeting $2.6B valuation' },
-        { date: '2025-04-15', title: 'Files amended S-1 with updated financials' },
-      ]
-    },
-    { 
-      id: 2, 
-      name: 'eToro', 
-      sector: 'Fintech',
-      targetValuation: 3.2,
-      filingDate: '2025-03-05',
-      expectedDebutDate: '2025-05-15',
-      roadshowStatus: 'Pricing',
-      fundingRaised: 720,
-      lastValuation: 2.5,
-      growth: 85,
-      risk: 'Medium-High',
-      stage: 'Pricing',
-      revenueGrowth: [
-        { year: '2022', value: 150 },
-        { year: '2023', value: 210 },
-        { year: '2024', value: 320 },
-      ],
-      keyMetrics: {
-        cac: '$210',
-        ltv: '$890',
-        margins: '72%',
-        burnRate: '$4.2M/month',
-      },
-      news: [
-        { date: '2025-05-13', title: 'Set to price IPO this evening' },
-        { date: '2025-05-01', title: 'Announces target price range of $18-22' },
-      ]
-    },
-    { 
-      id: 3, 
-      name: 'Chime', 
-      sector: 'Fintech',
-      targetValuation: 8.5,
-      filingDate: '2025-05-10',
-      expectedDebutDate: '2025-06-20',
-      roadshowStatus: 'Preparing',
-      fundingRaised: 1500,
-      lastValuation: 6.8,
-      growth: 95,
-      risk: 'Low',
-      stage: 'Filed',
-      revenueGrowth: [
-        { year: '2022', value: 280 },
-        { year: '2023', value: 450 },
-        { year: '2024', value: 720 },
-      ],
-      keyMetrics: {
-        cac: '$110',
-        ltv: '$1,200',
-        margins: '65%',
-        burnRate: '$7.5M/month',
-      },
-      news: [
-        { date: '2025-05-13', title: 'Revealed IPO paperwork this afternoon' },
-        { date: '2025-04-28', title: 'Hires new CFO with IPO experience' },
-      ]
-    },
-    { 
-      id: 4, 
-      name: 'Klarna', 
-      sector: 'Fintech',
-      targetValuation: 12.2,
-      filingDate: null,
-      expectedDebutDate: '2025-09-15',
-      roadshowStatus: 'Not Started',
-      fundingRaised: 3700,
-      lastValuation: 10.5,
-      growth: 65,
-      risk: 'Medium',
-      stage: 'Rumored',
-      revenueGrowth: [
-        { year: '2022', value: 520 },
-        { year: '2023', value: 680 },
-        { year: '2024', value: 950 },
-      ],
-      keyMetrics: {
-        cac: '$90',
-        ltv: '$850',
-        margins: '59%',
-        burnRate: '$12M/month',
-      },
-      news: [
-        { date: '2025-04-20', title: 'CEO hints at 2025 IPO plans in earnings call' },
-        { date: '2025-03-15', title: 'Reports first profitable quarter' },
-      ]
-    },
-    { 
-      id: 5, 
-      name: 'Circle', 
-      sector: 'Crypto/Fintech',
-      targetValuation: 5.8,
-      filingDate: null,
-      expectedDebutDate: '2025-10-10',
-      roadshowStatus: 'Not Started',
-      fundingRaised: 1100,
-      lastValuation: 4.1,
-      growth: 130,
-      risk: 'High',
-      stage: 'Preparing',
-      revenueGrowth: [
-        { year: '2022', value: 90 },
-        { year: '2023', value: 180 },
-        { year: '2024', value: 410 },
-      ],
-      keyMetrics: {
-        cac: '$70',
-        ltv: '$950',
-        margins: '81%',
-        burnRate: '$5.2M/month',
-      },
-      news: [
-        { date: '2025-05-05', title: 'Reported to be interviewing underwriters' },
-        { date: '2025-03-30', title: 'Reaches 10M active users milestone' },
-      ]
-    },
-  ];
+  // State for real data
+  const [upcomingIPOs, setUpcomingIPOs] = useState([]);
+  const [angelInvestments, setAngelInvestments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  // API service functions
+  const fetchUpcomingIPOs = async () => {
+    try {
+      const response = await fetch('/api/ipo-calendar');
+      if (!response.ok) throw new Error('Failed to fetch IPO data');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching upcoming IPOs:', error);
+      throw error;
+    }
+  };
+
+  const fetchAngelInvestments = async () => {
+    try {
+      const response = await fetch('/api/angel-investments');
+      if (!response.ok) throw new Error('Failed to fetch angel investment data');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching angel investments:', error);
+      throw error;
+    }
+  };
+
+  // Load data when component mounts
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [ipos, angels] = await Promise.all([
+          fetchUpcomingIPOs(),
+          fetchAngelInvestments()
+        ]);
+        
+        setUpcomingIPOs(ipos);
+        setAngelInvestments(angels);
+        setLastUpdated(new Date());
+        
+        // Set first company as selected by default
+        if (ipos.length > 0 && !selectedCompany) {
+          setSelectedCompany(ipos[0]);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      const [ipos, angels] = await Promise.all([
+        fetchUpcomingIPOs(),
+        fetchAngelInvestments()
+      ]);
+      
+      setUpcomingIPOs(ipos);
+      setAngelInvestments(angels);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      console.error('Failed to refresh data:', err);
+      setError('Failed to refresh data. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
-  const angelInvestments = [
-    { 
-      id: 101, 
-      name: 'Quantum Compute AI', 
-      sector: 'AI/Quantum',
-      stage: 'Series A',
-      targetRaise: 25,
-      valuation: 120,
-      growth: 185,
-      risk: 'High',
-      revenueGrowth: [
-        { year: '2023', value: 0.8 },
-        { year: '2024', value: 2.5 },
-      ],
-      keyMetrics: {
-        cac: '$5,200',
-        ltv: '$75,000',
-        margins: '92%',
-        burnRate: '$850K/month',
-      },
-      traction: 'Early enterprise contracts with 3 Fortune 500 companies',
-      team: 'Founded by ex-Google Quantum Computing researchers',
-      investors: 'Y Combinator, Andreessen Horowitz',
-      news: [
-        { date: '2025-04-25', title: 'Opens Series A funding round' },
-        { date: '2025-03-10', title: 'Announces breakthrough in quantum ML algorithms' },
-      ]
-    },
-    { 
-      id: 102, 
-      name: 'BioRegenX', 
-      sector: 'BioTech',
-      stage: 'Seed+',
-      targetRaise: 12,
-      valuation: 45,
-      growth: 110,
-      risk: 'Very High',
-      revenueGrowth: [
-        { year: '2023', value: 0 },
-        { year: '2024', value: 0.4 },
-      ],
-      keyMetrics: {
-        cac: 'Pre-revenue',
-        ltv: 'Estimated $120K/patient',
-        margins: 'Projected 75%',
-        burnRate: '$620K/month',
-      },
-      traction: 'Successful Phase 1 trials, FDA fast-track designation',
-      team: 'Led by Stanford Medical School department head',
-      investors: 'Johnson & Johnson Innovation, Illumina Ventures',
-      news: [
-        { date: '2025-05-10', title: 'Secures new patents for regenerative therapy' },
-        { date: '2025-02-28', title: 'Completes pre-clinical trials with promising results' },
-      ]
-    },
-  ];
+  // Combined news from all companies for the news tab
+  const allNews = [...upcomingIPOs, ...angelInvestments].flatMap(company => 
+    (company.news || []).map(item => ({
+      ...item,
+      company: company.name,
+      sector: company.sector
+    }))
+  ).sort((a, b) => new Date(b.date) - new Date(a.date));
   
-  const sectors = ['All', 'Fintech', 'Health Tech', 'AI/Quantum', 'BioTech', 'Crypto/Fintech'];
-  const stages = ['All', 'Rumored', 'Preparing', 'Filed', 'Roadshow', 'Pricing'];
+  // Filter options
+  const sectors = ['All', ...new Set([
+    ...upcomingIPOs.map(ipo => ipo.sector),
+    ...angelInvestments.map(angel => angel.sector)
+  ])];
   
-  // Filtered IPO listings
+  const newsSectors = ['All', ...new Set(allNews.map(item => item.sector))];
+  
+  // Filtered data
   const filteredIPOs = upcomingIPOs.filter(ipo => 
     filterSector === 'All' || ipo.sector === filterSector
+  );
+  
+  const filteredNews = allNews.filter(item => 
+    newsTab === 'all' || item.sector === newsTab
   );
   
   // Risk color mapping
@@ -252,6 +147,45 @@ const IPOTrackerApp = () => {
       day: 'numeric' 
     }).format(date);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-600">Loading real IPO data...</p>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 mt-2">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <div className="text-red-500 text-center mb-4">
+            <AlertTriangle size={48} className="mx-auto" />
+          </div>
+          <h2 className="text-xl font-bold text-center text-gray-800 mb-2">Error Loading Data</h2>
+          <p className="text-gray-600 text-center mb-4">{error}</p>
+          <button 
+            onClick={handleRefresh}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
+          >
+            <RefreshCw size={16} />
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   // Company Detail View
   const CompanyDetail = ({ company }) => {
@@ -269,12 +203,20 @@ const IPOTrackerApp = () => {
               <span className="px-2 py-1 bg-gray-100 rounded-md text-sm">
                 {activeTab === 'upcoming' ? company.stage : company.stage}
               </span>
+              {company.symbol && (
+                <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-sm">
+                  {company.symbol}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex flex-col items-end">
             <div className="text-xl font-bold">
-              ${company.targetValuation}B
-              <span className="text-sm text-gray-500 ml-1">Target Valuation</span>
+              ${activeTab === 'upcoming' ? company.targetValuation : company.targetRaise}
+              {activeTab === 'upcoming' ? 'B' : 'M'}
+              <span className="text-sm text-gray-500 ml-1">
+                {activeTab === 'upcoming' ? 'Target Valuation' : 'Target Raise'}
+              </span>
             </div>
             <div className="flex items-center mt-1">
               <span className="flex items-center text-sm" style={{ color: company.growth > 100 ? '#4CAF50' : '#F44336' }}>
@@ -290,8 +232,27 @@ const IPOTrackerApp = () => {
             </div>
           </div>
         </div>
+
+        {/* Company Website */}
+        {company.website && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 flex items-center">
+              <Globe size={18} className="mr-2" />
+              Company Website
+            </h3>
+            <a 
+              href={company.website} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+            >
+              <ExternalLink size={16} className="mr-2" />
+              Visit {company.name} Website
+            </a>
+          </div>
+        )}
         
-        {/* Timeline & Key Dates */}
+        {/* Timeline & Key Dates for IPOs */}
         {activeTab === 'upcoming' && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 flex items-center">
@@ -321,11 +282,17 @@ const IPOTrackerApp = () => {
                 <div className="text-sm text-gray-500">Last Private Valuation</div>
                 <div className="font-medium">${company.lastValuation}B</div>
               </div>
+              {company.exchange && (
+                <div className="bg-gray-50 p-3 rounded-md col-span-2">
+                  <div className="text-sm text-gray-500">Exchange</div>
+                  <div className="font-medium">{company.exchange}</div>
+                </div>
+              )}
             </div>
           </div>
         )}
         
-        {/* Traction & Team (Angel Investments) */}
+        {/* Traction & Team for Angel Investments */}
         {activeTab === 'angel' && (
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 flex items-center">
@@ -333,91 +300,120 @@ const IPOTrackerApp = () => {
               Traction & Team
             </h3>
             <div className="grid grid-cols-1 gap-4">
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Traction</div>
-                <div className="font-medium">{company.traction}</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Team Background</div>
-                <div className="font-medium">{company.team}</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Current Investors</div>
-                <div className="font-medium">{company.investors}</div>
-              </div>
+              {company.traction && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">Traction</div>
+                  <div className="font-medium">{company.traction}</div>
+                </div>
+              )}
+              {company.team && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">Team Background</div>
+                  <div className="font-medium">{company.team}</div>
+                </div>
+              )}
+              {company.investors && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">Current Investors</div>
+                  <div className="font-medium">{company.investors}</div>
+                </div>
+              )}
             </div>
           </div>
         )}
         
         {/* Revenue Growth Chart */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 flex items-center">
-            <TrendingUp size={18} className="mr-2" />
-            Revenue Growth
-          </h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={company.revenueGrowth}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  name="Revenue ($M)" 
-                  stroke="#3B82F6" 
-                  strokeWidth={2} 
-                  dot={{ r: 6 }}
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        {company.revenueGrowth && company.revenueGrowth.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 flex items-center">
+              <TrendingUp size={18} className="mr-2" />
+              Revenue Growth
+            </h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={company.revenueGrowth}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="value" 
+                    name="Revenue ($M)" 
+                    stroke="#3B82F6" 
+                    strokeWidth={2} 
+                    dot={{ r: 6 }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Key Metrics */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 flex items-center">
-            <Layers size={18} className="mr-2" />
-            Key Metrics
-          </h3>
-          <div className="grid grid-cols-4 gap-4">
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">CAC</div>
-              <div className="font-medium">{company.keyMetrics.cac}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">LTV</div>
-              <div className="font-medium">{company.keyMetrics.ltv}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Margins</div>
-              <div className="font-medium">{company.keyMetrics.margins}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Burn Rate</div>
-              <div className="font-medium">{company.keyMetrics.burnRate}</div>
+        {company.keyMetrics && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 flex items-center">
+              <Layers size={18} className="mr-2" />
+              Key Metrics
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {company.keyMetrics.cac && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">CAC</div>
+                  <div className="font-medium">{company.keyMetrics.cac}</div>
+                </div>
+              )}
+              {company.keyMetrics.ltv && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">LTV</div>
+                  <div className="font-medium">{company.keyMetrics.ltv}</div>
+                </div>
+              )}
+              {company.keyMetrics.margins && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">Margins</div>
+                  <div className="font-medium">{company.keyMetrics.margins}</div>
+                </div>
+              )}
+              {company.keyMetrics.burnRate && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <div className="text-sm text-gray-500">Burn Rate</div>
+                  <div className="font-medium">{company.keyMetrics.burnRate}</div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
         
         {/* Recent News */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3 flex items-center">
-            <Eye size={18} className="mr-2" />
-            Recent News
-          </h3>
-          <div className="space-y-3">
-            {company.news.map((item, idx) => (
-              <div key={idx} className="border-l-4 border-blue-500 pl-3 py-1">
-                <div className="text-sm text-gray-500">{formatDate(item.date)}</div>
-                <div className="font-medium">{item.title}</div>
-              </div>
-            ))}
+        {company.news && company.news.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-3 flex items-center">
+              <Eye size={18} className="mr-2" />
+              Recent News
+            </h3>
+            <div className="space-y-3">
+              {company.news.map((item, idx) => (
+                <a 
+                  key={idx} 
+                  href={item.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block border-l-4 border-blue-500 pl-3 py-2 hover:bg-blue-50 transition-colors rounded-r-md"
+                >
+                  <div className="text-sm text-gray-500">{formatDate(item.date)}</div>
+                  <div className="font-medium flex items-center">
+                    {item.title}
+                    <ExternalLink size={14} className="ml-2 text-blue-500" />
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -433,27 +429,51 @@ const IPOTrackerApp = () => {
               <p className="text-gray-600 mt-1">
                 Deep analysis of upcoming IPOs and promising investment opportunities
               </p>
+              {lastUpdated && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Last updated: {lastUpdated.toLocaleString()}
+                </p>
+              )}
             </div>
-            <div className="mt-4 md:mt-0 flex">
+            <div className="mt-4 md:mt-0 flex gap-2 items-center">
+              <button 
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-1 transition-colors"
+              >
+                <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+                Refresh
+              </button>
               <button 
                 onClick={() => setActiveTab('upcoming')}
-                className={`px-4 py-2 mr-2 rounded-md ${
+                className={`px-4 py-2 rounded-md transition-colors ${
                   activeTab === 'upcoming' 
                     ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 Upcoming IPOs
               </button>
               <button 
                 onClick={() => setActiveTab('angel')}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-4 py-2 rounded-md transition-colors ${
                   activeTab === 'angel' 
                     ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 Angel Investments
+              </button>
+              <button 
+                onClick={() => setActiveTab('news')}
+                className={`px-4 py-2 rounded-md flex items-center transition-colors ${
+                  activeTab === 'news' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Newspaper size={16} className="mr-1" />
+                Latest News
               </button>
             </div>
           </div>
@@ -461,87 +481,164 @@ const IPOTrackerApp = () => {
         
         {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Side - Company List */}
-          <div className="md:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">
-                  {activeTab === 'upcoming' ? 'Upcoming IPOs' : 'Angel Opportunities'}
-                </h2>
+          {activeTab === 'news' ? (
+            // News Tab Content
+            <div className="md:col-span-3">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold flex items-center">
+                    <Newspaper size={24} className="mr-2" />
+                    Latest IPO & Investment News
+                  </h2>
+                  
+                  {/* Filter dropdown */}
+                  <div>
+                    <select 
+                      value={newsTab}
+                      onChange={(e) => setNewsTab(e.target.value)}
+                      className="border rounded-md px-3 py-2 text-sm"
+                    >
+                      {newsSectors.map(sector => (
+                        <option key={sector} value={sector}>{sector}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 
-                {/* Filter dropdown */}
-                <div>
-                  <select 
-                    value={filterSector}
-                    onChange={(e) => setFilterSector(e.target.value)}
-                    className="border rounded-md px-3 py-1 text-sm"
-                  >
-                    {sectors.map(sector => (
-                      <option key={sector} value={sector}>{sector}</option>
-                    ))}
-                  </select>
+                {/* News list */}
+                <div className="space-y-4">
+                  {filteredNews.length > 0 ? (
+                    filteredNews.map((item, idx) => (
+                      <a 
+                        key={idx} 
+                        href={item.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="font-semibold text-lg">{item.title}</div>
+                            <div className="text-sm text-gray-600 mt-1 flex items-center gap-3">
+                              <span className="flex items-center">
+                                <Calendar size={14} className="mr-1" />
+                                {formatDate(item.date)}
+                              </span>
+                              <span className="font-medium text-blue-600">{item.company}</span>
+                              <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                                {item.sector}
+                              </span>
+                            </div>
+                          </div>
+                          <ExternalLink size={18} className="text-blue-500" />
+                        </div>
+                      </a>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Newspaper size={48} className="mx-auto mb-4 opacity-50" />
+                      <p>No news available for the selected filter.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Regular IPO/Angel Content
+            <>
+              {/* Left Side - Company List */}
+              <div className="md:col-span-1">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">
+                      {activeTab === 'upcoming' ? 'Upcoming IPOs' : 'Angel Opportunities'}
+                      <span className="text-sm font-normal text-gray-500 ml-2">
+                        ({activeTab === 'upcoming' ? filteredIPOs.length : angelInvestments.length})
+                      </span>
+                    </h2>
+                    
+                    {/* Filter dropdown */}
+                    <div>
+                      <select 
+                        value={filterSector}
+                        onChange={(e) => setFilterSector(e.target.value)}
+                        className="border rounded-md px-3 py-1 text-sm"
+                      >
+                        {sectors.map(sector => (
+                          <option key={sector} value={sector}>{sector}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {/* Company list */}
+                  <div className="space-y-3">
+                    {(activeTab === 'upcoming' ? filteredIPOs : angelInvestments).length > 0 ? (
+                      (activeTab === 'upcoming' ? filteredIPOs : angelInvestments).map(company => (
+                        <div 
+                          key={company.id}
+                          onClick={() => setSelectedCompany(company)}
+                          className={`border border-gray-200 rounded-md p-3 cursor-pointer transition-colors ${
+                            selectedCompany?.id === company.id 
+                              ? 'bg-blue-50 border-blue-300' 
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-medium">{company.name}</div>
+                              <div className="text-sm text-gray-600 flex items-center gap-2">
+                                <span>{company.sector}</span>
+                                {activeTab === 'upcoming' ? (
+                                  <span className="flex items-center">
+                                    <Clock size={14} className="mr-1" />
+                                    {company.stage}
+                                  </span>
+                                ) : (
+                                  <span>{company.stage}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <div className="font-bold">
+                                ${activeTab === 'upcoming' ? company.targetValuation : company.targetRaise}
+                                {activeTab === 'upcoming' ? 'B' : 'M'}
+                              </div>
+                              <div 
+                                className="text-xs px-2 py-1 rounded-full text-white mt-1"
+                                style={{ backgroundColor: getRiskColor(company.risk) }}
+                              >
+                                {company.risk}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Briefcase size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>No companies found for the selected filter.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               
-              {/* Company list */}
-              <div className="space-y-3">
-                {(activeTab === 'upcoming' ? filteredIPOs : angelInvestments).map(company => (
-                  <div 
-                    key={company.id}
-                    onClick={() => setSelectedCompany(company)}
-                    className={`border border-gray-200 rounded-md p-3 cursor-pointer transition-colors ${
-                      selectedCompany?.id === company.id 
-                        ? 'bg-blue-50 border-blue-300' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-medium">{company.name}</div>
-                        <div className="text-sm text-gray-600 flex items-center gap-2">
-                          <span>{company.sector}</span>
-                          {activeTab === 'upcoming' ? (
-                            <span className="flex items-center">
-                              <Clock size={14} className="mr-1" />
-                              {company.stage}
-                            </span>
-                          ) : (
-                            <span>{company.stage}</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <div className="font-bold">
-                          ${activeTab === 'upcoming' ? company.targetValuation : company.targetRaise}
-                          {activeTab === 'upcoming' ? 'B' : 'M'}
-                        </div>
-                        <div 
-                          className="text-xs px-2 py-1 rounded-full text-white mt-1"
-                          style={{ backgroundColor: getRiskColor(company.risk) }}
-                        >
-                          {company.risk}
-                        </div>
-                      </div>
+              {/* Right Side - Company Details */}
+              <div className="md:col-span-2">
+                {selectedCompany ? (
+                  <CompanyDetail company={selectedCompany} />
+                ) : (
+                  <div className="bg-white p-6 rounded-lg shadow-md h-full flex items-center justify-center">
+                    <div className="text-center text-gray-500">
+                      <AlertTriangle size={48} className="mx-auto mb-4 opacity-50" />
+                      <p className="text-xl font-medium">Select a company to view detailed analysis</p>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          </div>
-          
-          {/* Right Side - Company Details */}
-          <div className="md:col-span-2">
-            {selectedCompany ? (
-              <CompanyDetail company={selectedCompany} />
-            ) : (
-              <div className="bg-white p-6 rounded-lg shadow-md h-full flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <AlertTriangle size={48} className="mx-auto mb-4 opacity-50" />
-                  <p className="text-xl font-medium">Select a company to view detailed analysis</p>
-                </div>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
